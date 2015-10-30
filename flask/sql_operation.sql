@@ -1,3 +1,19 @@
+/* 通过给定的 classroom id 返回与之相应的 position */
+SELECT
+	position
+FROM
+	classroom
+WHERE
+	id=1
+
+/* 通过给定的 position 返回与之相应的 classroom_id */
+SELECT
+	id
+FROM
+	classroom
+WHERE
+	position = '六号楼6203'
+
 /* 通过给定的 class 返回这个班所有上的课 */
 SELECT
 	*
@@ -53,7 +69,7 @@ WHERE
 
 /* 通过给定的position和time返回这个position和time的课的course_name和position */
 SELECT
-	course.name, aaaaaa.classroom_id
+	course.name, alias_table.classroom_id
 FROM
 	course JOIN (
 						SELECT
@@ -63,5 +79,5 @@ FROM
 						WHERE
 							lesson.classroom_id = 1 AND lesson.year = 20102011 AND lesson.term = 1 AND lesson.week = 9 AND lesson.day = 1 AND lesson.time = 1
 						LIMIT 1
-					) AS aaaaaa
-WHERE course.id = aaaaaa.course_id
+					) AS alias_table
+WHERE course.id = alias_table.course_id
