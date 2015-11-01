@@ -81,3 +81,11 @@ FROM
 						LIMIT 1
 					) AS alias_table
 WHERE course.id = alias_table.course_id
+
+/* 通过给定的 username 返回密码*/
+SELECT
+	password
+FROM
+	student
+WHERE
+	id = 201315414
