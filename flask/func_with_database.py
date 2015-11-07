@@ -28,11 +28,10 @@ def get_term(time):
     return term
 
 def get_week(time):
-    today = datetime.today()
     if get_term(time) == 1:
-        return ((today - startDayOfTheFirstTerm).days) // 7 + 1
+        return ((time - startDayOfTheFirstTerm).days) // 7 + 1
     else:
-        return ((today - startDayOfTheSecondTerm).days) // 7 + 1
+        return ((time - startDayOfTheSecondTerm).days) // 7 + 1
 
 def get_day(time):
     return time.weekday() + 1
@@ -106,7 +105,7 @@ def func_getCrowdednessRateByPosition(position):
         result = cursor.fetchone()
         return result['crowded_rate']
 
-def func_getNearbyPositionByPosition(position):
+def func_getNearbyPositionsByPosition(position):
     ''' 通过给定的position返回相同楼层附近的教室position
 
     '''
@@ -129,12 +128,27 @@ def func_getCourseNameAndPositionByTimeAndPosition(position, classTime):
     '''
     sql = "SELECT course.name, alias_table.classroom_id FROM course JOIN ( SELECT course_id, classroom_id FROM lesson WHERE lesson.classroom_id = %s AND lesson.year = %s AND lesson.term = %s AND lesson.week = %s AND lesson.day = %s AND lesson.time = %s LIMIT 1 ) AS alias_table WHERE course.id = alias_table.course_id"
     classroom_id = func_getClassroomIdByPosition(position)
+    # 深度拷贝，参数传进来的classTime列表是传的引用
+    classTime = classTime[:]
     classTime.insert(0, classroom_id)
     sqlParam = classTime
 
     with connection.cursor() as cursor:
         cursor.execute(sql, tuple(sqlParam))
         result = cursor.fetchone()
-        result['position'] = position
+        if result:
+            result['position'] = position
         # result = {'name': '自动控制原理', 'classroom_id': 1, 'position': '六号楼6302'}
         return result
+
+def func_checkAccount(username, password):
+    ''' 通过给定的账号密码验证是否符合数据库里存储的
+
+    '''
+    sql = "SELECT password FROM student WHERE id = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(sql, username)
+        result = cursor.fetchone()
+        if password == result['password']:
+            return True
+        return False
