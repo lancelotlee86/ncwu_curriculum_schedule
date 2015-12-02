@@ -1,7 +1,7 @@
 import pymysql.cursors
 import time
 from datetime import datetime
-from config import startDayOfTheFirstTerm, startDayOfTheSecondTerm
+from .config import startDayOfTheFirstTerm, startDayOfTheSecondTerm
 
 # Connect to the database
 connection = pymysql.connect(host='localhost',
