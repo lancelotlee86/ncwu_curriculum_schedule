@@ -22,6 +22,7 @@ def getCrowdednessRateByPosition(position):
 
 @app.route("/getNearbyCourseByPosition/<position>")
 def getNearbyCourseByPosition(position):
+    classroom = Classroom(position)
     nearby_positions = func_getNearbyPositionsByPosition(position)
     now = datetime.now()
     classTimeNow = func_getClassTimeByGivenTime(now)
@@ -42,6 +43,9 @@ def checkAccount(username, password):
     if func_checkAccount(username, password):
         return '1'
     return '0'
+
+
+
 
 if __name__ == "__main__":
     app.run()

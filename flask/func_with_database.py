@@ -1,7 +1,8 @@
 import pymysql.cursors
 import time
 from datetime import datetime
-from .config import startDayOfTheFirstTerm, startDayOfTheSecondTerm
+from config import startDayOfTheFirstTerm, startDayOfTheSecondTerm
+from sql_operation import *
 
 # Connect to the database
 connection = pymysql.connect(host='localhost',
@@ -14,7 +15,7 @@ connection = pymysql.connect(host='localhost',
 
 def get_year(time):
     if(time.month > 8):
-        year = str(time.year) + str(time.year + 1)
+        year = str(time.year) + str(time.year + 1)\
     else:
         year = str(time.year - 1) + str(time.year)
     # year 格式为：20152016 字符串
@@ -79,7 +80,7 @@ def func_getPositionByClassroomId(classroom_id):
     ''' 通过给定的 classroom id 返回与之相应的 position
 
     '''
-    sql = "SELECT position FROM classroom WHERE id = %s"
+    sql = sql_getPositionByClassroomId
 
     with connection.cursor() as cursor:
         cursor.execute(sql, classroom_id)
@@ -152,3 +153,11 @@ def func_checkAccount(username, password):
         if password == result['password']:
             return True
         return False
+
+def func_insertCrowdednessRateByPosition(rate, position):
+    classroom_id = func_getClassroomIdByPosition(position)
+    sql = 'INSERT INTO crowdedness_record (classroom_id, crowded_rate, timestamp) VALUES ( %s, %s, %s);'
+    now = datetime.now()
+    with connection.cursor() as cursor:
+        cursor.execute(sql, (classroom_id, rate, now))
+    return True

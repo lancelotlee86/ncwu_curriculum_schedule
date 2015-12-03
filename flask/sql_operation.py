@@ -1,20 +1,24 @@
-/* 通过给定的 classroom id 返回与之相应的 position */
-SELECT
-	position
-FROM
-	classroom
-WHERE
-	id=1
+#通过给定的 classroom id 返回与之相应的 position
+sql_getPositionByClassroomId = """
+	SELECT
+		position
+	FROM
+		classroom
+	WHERE
+		id = %s
+	"""
 
-/* 通过给定的 position 返回与之相应的 classroom_id */
-SELECT
-	id
-FROM
-	classroom
-WHERE
-	position = '六号楼6203'
-
-/* 通过给定的 class 返回这个班所有上的课 */
+#通过给定的 position 返回与之相应的 classroom_id
+sql_getClassroomIdByPosition = """
+	SELECT
+		id
+	FROM
+		classroom
+	WHERE
+		position = '六号楼6203'
+	"""
+"""
+# 通过给定的 class 返回这个班所有上的课
 SELECT
 	*
 FROM (
@@ -89,3 +93,4 @@ FROM
 	student
 WHERE
 	id = 201315414
+"""
