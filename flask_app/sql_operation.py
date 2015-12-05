@@ -1,3 +1,13 @@
+sql_getClassroomById = """
+    SELECT *
+    FROM classroom
+    WHERE id = %s;"""
+
+sql_getClassroomByPosition = """
+    SELECT *
+    FROM classroom
+    WHERE position = %s;"""
+
 #通过给定的 classroom id 返回与之相应的 position
 sql_getPositionByClassroomId = """
 	SELECT
@@ -15,7 +25,7 @@ sql_getClassroomIdByPosition = """
 	FROM
 		classroom
 	WHERE
-		position = '六号楼6203'
+		position = %s
 	"""
 """
 # 通过给定的 class 返回这个班所有上的课
@@ -53,23 +63,27 @@ FROM
 	crowdedness_record
 WHERE
 	classroom_position = '六号楼6202'
+"""
+
+# 通过给定的position返回相同楼层附近的教室position
+sql_getNearbyPositionsByPosition = '''
+    SELECT
+        position
+    FROM
+        classroom
+    WHERE
+        (classroom.campus, classroom.building, classroom.floor) = (
+                                                                        SELECT
+                                                                            campus, building, floor
+                                                                        FROM
+                                                                            classroom
+                                                                        WHERE
+                                                                            classroom.position = %s
+                                                                        )
+    '''
 
 
-/* 通过给定的position返回相同楼层附近的教室position */
-SELECT
-	position
-FROM
-	classroom
-WHERE
-	(classroom.campus, classroom.building, classroom.floor) = (
-    																SELECT
-    																	campus, building, floor
-    																FROM
-    																	classroom
-    																WHERE
-    																	classroom.position = '六号楼6302'
-    																)
-
+"""
 
 /* 通过给定的position和time返回这个position和time的课的course_name和position */
 SELECT

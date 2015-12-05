@@ -1,11 +1,13 @@
 from flask import Flask
 from datetime import datetime
 
-from .func_with_database import func_getCrowdednessRateByPosition
-from .func_with_database import func_getNearbyPositionsByPosition
-from .func_with_database import func_getCourseNameAndPositionByTimeAndPosition
-from .func_with_database import func_getClassTimeByGivenTime
-from .func_with_database import func_checkAccount
+from flask_app.func_with_database import func_getCrowdednessRateByPosition
+from flask_app.func_with_database import func_getNearbyPositionsByPosition
+from flask_app.func_with_database import func_getCourseNameAndPositionByTimeAndPosition
+from flask_app.func_with_database import func_getClassTimeByGivenTime
+from flask_app.func_with_database import func_checkAccount
+
+from flask_app.models import Classroom
 
 app = Flask(__name__)
 app.debug = True
