@@ -55,16 +55,28 @@ FROM (
 	) as tt
 WHERE tt.day!='5' OR tt.time!='4'
 
-
-/* 通过给定的教室position返回拥挤程度 */
-SELECT
-	crowded_rate
-FROM
-	crowdedness_record
-WHERE
-	classroom_position = '六号楼6202'
 """
+# 通过给定的教室position返回拥挤程度
+sql_getCrowdednessRateByPosition = '''
+    SELECT
+        crowded_rate
+    FROM
+        crowdedness_record
+    WHERE
+        classroom_position = %s
+    '''
 
+# 通过给定的教室id返回拥挤程度
+sql_getCrowdednessRateById = '''
+    SELECT
+        crowded_rate
+    FROM
+        crowdedness_record
+    WHERE
+        classroom_id = %s
+    '''
+"""
+"""
 # 通过给定的position返回相同楼层附近的教室position
 sql_getNearbyPositionsByPosition = '''
     SELECT
@@ -84,22 +96,24 @@ sql_getNearbyPositionsByPosition = '''
 
 
 """
-
-/* 通过给定的position和time返回这个position和time的课的course_name和position */
-SELECT
-	course.name, alias_table.classroom_id
-FROM
-	course JOIN (
-						SELECT
-							course_id, classroom_id
-						FROM
-							lesson
-						WHERE
-							lesson.classroom_id = 1 AND lesson.year = 20102011 AND lesson.term = 1 AND lesson.week = 9 AND lesson.day = 1 AND lesson.time = 1
-						LIMIT 1
-					) AS alias_table
-WHERE course.id = alias_table.course_id
-
+"""
+# 通过给定的position和time返回这个position和time的课的course_name和position
+sql_getCourseByPositionAndTime = '''
+    SELECT
+        course.name, course.id, course.type, alias_table.classroom_id
+    FROM
+        course JOIN (
+                            SELECT
+                                course_id, classroom_id
+                            FROM
+                                lesson
+                            WHERE
+                                lesson.classroom_id = %s AND lesson.year = %s AND lesson.term = %s AND lesson.week = %s AND lesson.day = %s AND lesson.time = %s
+                            LIMIT 1
+                        ) AS alias_table
+    WHERE course.id = alias_table.course_id
+    '''
+"""
 /* 通过给定的 username 返回密码*/
 SELECT
 	password

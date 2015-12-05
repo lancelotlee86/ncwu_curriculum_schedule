@@ -13,13 +13,7 @@ connection = pymysql.connect(host='localhost',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
 
-def func_getCrowdednessRateByPosition(position):
-    sql = "SELECT crowded_rate FROM crowdedness_record WHERE classroom_position = %s"
 
-    with connection.cursor() as cursor:
-        cursor.execute(sql, position)
-        result = cursor.fetchone()
-        return result['crowded_rate']
 
 
 
@@ -160,3 +154,11 @@ def func_getClassTimeByGivenTime(time):
     time = get_time(time)
     classTime = [year, term, week, day, time]
     return classTime
+
+def func_getCrowdednessRateByPosition(position):
+    sql = "SELECT crowded_rate FROM crowdedness_record WHERE classroom_position = %s"
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, position)
+        result = cursor.fetchone()
+        return result['crowded_rate']

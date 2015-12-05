@@ -64,6 +64,13 @@ class Classroom:
                 nearby_classrooms.append(Classroom(_position=position))
             return nearby_classrooms
 
+    def crowdedness(self):
+        sql = sql_getCrowdednessRateById
+        with connection.cursor() as cursor:
+            cursor.execute(sql, self._id)
+            result = cursor.fetchone()
+            return result
+
 
 class LessonTime:
 
@@ -79,6 +86,18 @@ class LessonTime:
         self.week = self.get_week(_datetime)
         self.day = self.get_day(_datetime)
         self.time = self.get_time(_datetime)
+
+    @classmethod
+    def from_string(cls, time_string):
+        '''
+        传入string类型的表示课的时间的字符串，格式为 '20152016-1-12-1-2'
+        :param time_string: string
+        :return:
+        '''
+        time_string = time_string.split('-')
+        cls.year = time_string[0]
+        ###################################################################
+
 
     @staticmethod
     def get_year(_datetime):
@@ -132,6 +151,28 @@ class LessonTime:
             return 5
         return 0
 
+
+class Course:
+
+    name = None # 课程名称
+    _id = None  # 课程id
+    type = None # 课程类型，选修或必修
+
+    # def __init__(self, ):
+
+
+    @classmethod
+    def from_classroom_and_lessontime(cls, classroom, lesson_time):
+        sql = sql_getCourseByPositionAndTime
+        with connection.cursor() as cursor:
+            cursor.execute(sql, (classroom._id, lesson_time.year, lesson_time.term, lesson_time.week, lesson_time.day, lesson_time.time))
+            result = cursor.fetchone()
+
+
+
+
 if __name__ == '__main__':
     c = Classroom(_position = '六号楼6103')
     cs = c.get_nearby_classrooms()
+    c.crowdedness()
+
