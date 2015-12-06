@@ -40,12 +40,15 @@ class Classroom:
             self.number = result['capacity']
             self._position = result['position']
 
+    def __self__(self, s_id=None, s_position=None):
+        self.__init__(self, _id=s_id, _position=s_position)
+        return self
+
     def __repr__(self):
         return '<Classroom %r>' % self._position
 
     def get_nearby_classrooms(self):
-        '''
-        返回当前对象代表教室的附近所有的教室, 返回的是对象列表
+        ''' 返回当前对象代表教室的附近所有的教室, 返回的是对象列表
         :return:
         '''
         sql = sql_getNearbyPositionsByPosition
@@ -96,7 +99,11 @@ class LessonTime:
         '''
         time_string = time_string.split('-')
         cls.year = time_string[0]
-        ###################################################################
+        cls.term = time_string[1]
+        cls.week = time_string[2]
+        cls.day = time_string[3]
+        cls.time = time_string[4]
+        return cls
 
 
     @staticmethod
@@ -158,21 +165,52 @@ class Course:
     _id = None  # 课程id
     type = None # 课程类型，选修或必修
 
-    # def __init__(self, ):
-
-
+    # def __init__(self, )
     @classmethod
     def from_classroom_and_lessontime(cls, classroom, lesson_time):
         sql = sql_getCourseByPositionAndTime
         with connection.cursor() as cursor:
             cursor.execute(sql, (classroom._id, lesson_time.year, lesson_time.term, lesson_time.week, lesson_time.day, lesson_time.time))
             result = cursor.fetchone()
+            cls.name = result['name']
+            cls._id = result['id']
+            cls.type = result['type']
+        return cls
 
+
+class Lesson(Course, Classroom, LessonTime):
+
+    def __init__(self, _id=None, _position=None, _datetime=None, _datetime_string=None):
+        # 初始化 Classroom 父类
+        if _id:
+            Classroom.__init__(self, _id=_id)
+        else:
+            Classroom.__init__(self, _position=_position)
+
+        # 初始化 LessonTime 父类
+        if _datetime:
+            LessonTime.__init__(self, _datetime)
+        else:
+            LessonTime.from_string(_datetime_string)
+
+        # 初始化 Course 父类。这里由于 Course 类的构造函数使用的是 Classroom 和 LessonTime 的实例，所以这里就实例了一下
+        if( _position):
+            classroom = Classroom(_position=_position)
+        else:
+            classroom = Classroom(_id=_id)
+        if( _datetime):
+            lesson = LessonTime(_datetime)
+        else:
+            lesson = LessonTime.from_string(_datetime_string)
+        Course.from_classroom_and_lessontime(classroom, lesson)
 
 
 
 if __name__ == '__main__':
-    c = Classroom(_position = '六号楼6103')
-    cs = c.get_nearby_classrooms()
-    c.crowdedness()
+    #c = Classroom(_position = '六号楼6103')
+    #t = LessonTime.from_string('20102011-1-1-3-1')
+    #course = Course.from_classroom_and_lessontime(c, t)
+
+    lesson = Lesson(_position='六号楼6103', _datetime_string='20102011-1-1-3-1')
+
 
