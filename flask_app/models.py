@@ -1,4 +1,3 @@
-from flask import Flask
 import pymysql.cursors
 from datetime import datetime
 from flask_app.sql_operation import *
@@ -15,7 +14,7 @@ connection = pymysql.connect(host='localhost',
 
 class Classroom:
 
-    _id = None
+    clsrm_id = None
     campus = None
     building = None
     floor = None
@@ -23,31 +22,27 @@ class Classroom:
     capacity = None
     _position = None
 
-    def __init__(self, _id=None, _position=None):
-        if(_id):
+    def __init__(self, clsrm_id=None, _position=None):
+        if(clsrm_id):
             sql = sql_getClassroomById
         elif(_position):
             sql = sql_getClassroomByPosition
         else:
             sql = ''
         with connection.cursor() as cursor:
-            cursor.execute(sql, _id if _id else _position)
+            cursor.execute(sql, clsrm_id if clsrm_id else _position)
             result = cursor.fetchone()
-            self._id = result['id']
+            self.clsrm_id = result['id']
             self.campus = result['campus']
             self.building = result['building']
             self.floor = result['floor']
             self.number = result['capacity']
             self._position = result['position']
 
-    def __self__(self, s_id=None, s_position=None):
-        self.__init__(self, _id=s_id, _position=s_position)
-        return self
-
     def __repr__(self):
         return '<Classroom %r>' % self._position
 
-    def get_nearby_classrooms(self):
+    def nearby_classrooms(self):
         ''' 返回当前对象代表教室的附近所有的教室, 返回的是对象列表
         :return:
         '''
@@ -70,7 +65,7 @@ class Classroom:
     def crowdedness(self):
         sql = sql_getCrowdednessRateById
         with connection.cursor() as cursor:
-            cursor.execute(sql, self._id)
+            cursor.execute(sql, self.clsrm_id)
             result = cursor.fetchone()
             return result
 
@@ -82,13 +77,16 @@ class LessonTime:
     week = None
     day = None
     time = None
+    datetime_string = None
 
     def __init__(self, _datetime):
+        # 初始化接受的参数为 datetime 类型
         self.year = self.get_year(_datetime)
         self.term = self.get_term(_datetime)
         self.week = self.get_week(_datetime)
         self.day = self.get_day(_datetime)
         self.time = self.get_time(_datetime)
+        self.datetime_string = '-'.join((str(self.year), str(self.term), str(self.week), str(self.day), str(self.time)))
 
     @classmethod
     def from_string(cls, time_string):
@@ -97,6 +95,7 @@ class LessonTime:
         :param time_string: string
         :return:
         '''
+        cls.datetime_string = time_string
         time_string = time_string.split('-')
         cls.year = time_string[0]
         cls.term = time_string[1]
@@ -162,7 +161,7 @@ class LessonTime:
 class Course:
 
     name = None # 课程名称
-    _id = None  # 课程id
+    crs_id = None  # 课程id
     type = None # 课程类型，选修或必修
 
     # def __init__(self, )
@@ -170,20 +169,22 @@ class Course:
     def from_classroom_and_lessontime(cls, classroom, lesson_time):
         sql = sql_getCourseByPositionAndTime
         with connection.cursor() as cursor:
-            cursor.execute(sql, (classroom._id, lesson_time.year, lesson_time.term, lesson_time.week, lesson_time.day, lesson_time.time))
+            cursor.execute(sql, (classroom.clsrm_id, lesson_time.year, lesson_time.term, lesson_time.week, lesson_time.day, lesson_time.time))
             result = cursor.fetchone()
             cls.name = result['name']
-            cls._id = result['id']
+            cls.crs_id = result['id']
             cls.type = result['type']
         return cls
 
 
 class Lesson(Course, Classroom, LessonTime):
-
-    def __init__(self, _id=None, _position=None, _datetime=None, _datetime_string=None):
+    """
+    初始化时，clsrm_id和_position只用给一个, _datetime和_datetime_string只用给一个
+    """
+    def __init__(self, clsrm_id=None, _position=None, _datetime=None, _datetime_string=None):
         # 初始化 Classroom 父类
-        if _id:
-            Classroom.__init__(self, _id=_id)
+        if clsrm_id:
+            Classroom.__init__(self, clsrm_id=clsrm_id)
         else:
             Classroom.__init__(self, _position=_position)
 
@@ -197,13 +198,24 @@ class Lesson(Course, Classroom, LessonTime):
         if( _position):
             classroom = Classroom(_position=_position)
         else:
-            classroom = Classroom(_id=_id)
+            classroom = Classroom(clsrm_id=clsrm_id)
         if( _datetime):
             lesson = LessonTime(_datetime)
         else:
             lesson = LessonTime.from_string(_datetime_string)
         Course.from_classroom_and_lessontime(classroom, lesson)
 
+    def __repr__(self):
+        return '<Lesson %r, %r>' % (self.name, self._position)
+
+    def nearby_lessons(self):
+        # 获取这节课附近的教室
+        positions = self.nearby_classrooms()
+        lessons = []
+        for position in positions:
+            lesson = Lesson(clsrm_id=position.clsrm_id, _datetime_string=self.datetime_string)
+            lessons.append(lesson)
+        return lessons
 
 
 if __name__ == '__main__':

@@ -17,24 +17,6 @@ connection = pymysql.connect(host='localhost',
 
 
 
-def func_getCourseNameAndPositionByTimeAndPosition(position, classTime):
-    ''' 通过给定的position和time返回这个position和time的课的course_name和position还有classroom_id
-
-    '''
-    sql = "SELECT course.name, alias_table.classroom_id FROM course JOIN ( SELECT course_id, classroom_id FROM lesson WHERE lesson.classroom_id = %s AND lesson.year = %s AND lesson.term = %s AND lesson.week = %s AND lesson.day = %s AND lesson.time = %s LIMIT 1 ) AS alias_table WHERE course.id = alias_table.course_id"
-    classroom_id = func_getClassroomIdByPosition(position)
-    # 深度拷贝，参数传进来的classTime列表是传的引用
-    classTime = classTime[:]
-    classTime.insert(0, classroom_id)
-    sqlParam = classTime
-
-    with connection.cursor() as cursor:
-        cursor.execute(sql, tuple(sqlParam))
-        result = cursor.fetchone()
-        if result:
-            result['position'] = position
-        # result = {'name': '自动控制原理', 'classroom_id': 1, 'position': '六号楼6302'}
-        return result
 
 def func_checkAccount(username, password):
     ''' 通过给定的账号密码验证是否符合数据库里存储的
@@ -64,7 +46,7 @@ def func_getNearbyPositionsByPosition(position):
 
     '''
     classroom = Classroom(_position=position)
-    positions = classroom.get_nearby_classrooms()
+    positions = classroom.nearby_classrooms()
     classrooms = []
     for position in positions:
         c = Classroom(_position=position)
@@ -162,3 +144,22 @@ def func_getCrowdednessRateByPosition(position):
         cursor.execute(sql, position)
         result = cursor.fetchone()
         return result['crowded_rate']
+
+def func_getCourseNameAndPositionByTimeAndPosition(position, classTime):
+    ''' 通过给定的position和time返回这个position和time的课的course_name和position还有classroom_id
+
+    '''
+    sql = "SELECT course.name, alias_table.classroom_id FROM course JOIN ( SELECT course_id, classroom_id FROM lesson WHERE lesson.classroom_id = %s AND lesson.year = %s AND lesson.term = %s AND lesson.week = %s AND lesson.day = %s AND lesson.time = %s LIMIT 1 ) AS alias_table WHERE course.id = alias_table.course_id"
+    classroom_id = func_getClassroomIdByPosition(position)
+    # 深度拷贝，参数传进来的classTime列表是传的引用
+    classTime = classTime[:]
+    classTime.insert(0, classroom_id)
+    sqlParam = classTime
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql, tuple(sqlParam))
+        result = cursor.fetchone()
+        if result:
+            result['position'] = position
+        # result = {'name': '自动控制原理', 'classroom_id': 1, 'position': '六号楼6302'}
+        return result
