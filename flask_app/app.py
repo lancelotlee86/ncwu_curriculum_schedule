@@ -12,17 +12,20 @@ from flask_app.models import Classroom, Lesson, LessonTime
 app = Flask(__name__)
 app.debug = True
 
+
 @app.route("/")
 def hello():
     return "Hello World!"
 
-@app.route("/getCrowdednessRateByPosition/<position>")
-def getCrowdednessRateByPosition(position):
-    result = func_getCrowdednessRateByPosition(position)
-    return str(result)
+
+@app.route("/get_crowdedness_rate_by_position/<position>")
+def get_crowdedness_rate_by_position(position):
+    classroom = Classroom(_position=position)
+    crowdedness = classroom.crowdedness()['crowded_rate']
+    return str(crowdedness)
 
 
-@app.route("/getNearbyCourseByPosition/<position>")
+@app.route("/get_nearby_lessons_by_position/<position>")
 def get_nearby_lessons_by_position(position):
     """
     返回给定教室和时间的附近的课，这个方法默认当前访问时间
@@ -35,11 +38,10 @@ def get_nearby_lessons_by_position(position):
     nearby_lessons = lesson.nearby_lessons()
     re = []
     for lesson in nearby_lessons:
-        re.append({'name':lesson.name, 'position':lesson._position})
-    print(re)
+        re.append({'name': lesson.name, 'position': lesson._position})
     return str(re)
 
-@app.route("/checkAccount/<username>/<password>")
+@app.route("/check_account/<username>/<password>")
 def checkAccount(username, password):
     if func_checkAccount(username, password):
         return '1'

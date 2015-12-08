@@ -63,9 +63,13 @@ class Classroom:
             return nearby_classrooms
 
     def crowdedness(self):
+        """
+        返回当前教室对象的拥挤程度，字典
+        :return:
+        """
         sql = sql_getCrowdednessRateById
         with connection.cursor() as cursor:
-            cursor.execute(sql, self.clsrm_id)
+            cursor.execute(sql, str(self.clsrm_id))
             result = cursor.fetchone()
             return result
 
@@ -107,7 +111,7 @@ class LessonTime:
 
     @staticmethod
     def get_year(_datetime):
-        if(_datetime.month > 8):
+        if _datetime.month > 8:
             year = str(_datetime.year) + str(_datetime.year + 1)
         else:
             year = str(_datetime.year - 1) + str(_datetime.year)
@@ -216,6 +220,17 @@ class Lesson(Course, Classroom, LessonTime):
             lesson = Lesson(clsrm_id=position.clsrm_id, _datetime_string=self.datetime_string)
             lessons.append(lesson)
         return lessons
+
+
+class User:
+    name = None
+
+
+
+
+class Student(User):
+    pass
+
 
 
 if __name__ == '__main__':
