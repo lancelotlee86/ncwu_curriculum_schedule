@@ -1,57 +1,162 @@
 # 用户注册与验证
 1.	用途：	获取token
-	URL：	
-	方法：	GET
-	参数：
+	URL：	`/token`
+	方法：	`GET`
+	参数：`?token=<string>`
 	返回值：
-
-
+	
+	```
+	{
+		"token": <string>
+	}
+	```
 
 # 课程表
 
 1.	用途：	获取课程表（教学计划）
-	URL：	
-	方法：	GET
-	参数：	key=（token）
-	返回值：
+	URL：	`/static_lessons`
+	方法：	`GET`
+	参数：	`?token=<string>`
+	返回值：  
+    ```
+    {
+        lessons:
+        [
+            {
+                "lesson_id": <num>,
+                "name": <string>,
+                teacher:[string],
+                schedule:
+                [
+                    {
+                        "week": <num>,
+                        weekday:(num),
+                        class_index:(num),
+                    },
+                    ...
+                ]
+            },
+            {
+                ...
+            }
+        ]
+    }
+    ```
 
 2.	用途：	获取课程表（个性化课程）
-	URL：	
-	方法：	GET
-	参数：	key=（token）
+	URL：	`/mylessons`
+	方法：	`GET`
+	参数：	`?token=<string>`
 	返回值：
+    ```
+    {
+        lessons:
+        [
+            {
+                "lesson_id": <num>,
+                "name": <string>,
+                teacher:[string],
+                schedule:
+                [
+                    {
+                        "week": <num>,
+                        weekday:(num),
+                        class_index:(num),
+                    },
+                    ...
+                ]
+            },
+            {
+                ...
+            }
+        ]
+    }
+    ```
 
-3.	用途：	添加课程（个性化课程）
-	URL：	
-	方法：	POST
-	参数：	key=（token）
+3.	用途：	`添加课程（个性化课程）`
+	URL：	`/mylessons`
+	方法：	`POST`
+	参数：
+	```
+	{
+	    "token":（token）,
+	    lesson:{
+            name:[string],
+            teacher:[string],
+            schedule:[
+                {
+                     week:(num),
+                     weekday:(num),
+                     class_index:(int)
+                },
+                ...
+            ]
+        }
+	}
+	```
 	返回值：
+	
+	```
+	{
+		"result": "success/fault",
+		"lesson_id": <num>
+	}
+	```
 
 3.	用途：	删除课程（个性化课程）
-	URL：	
-	方法：	DELETE
-	参数：	key=（token）
-	返回值：
+	URL：	`/mycourse/<id>`
+	方法：	`DELETE`
+	参数：	`token=(token)`
+	返回值：`状态码200或204`
 
-3.	用途：	修改课程（个性化课程）
-	URL：	
-	方法：	PUT
-	参数：	key=（token）
-	返回值：
+3.	用途：	`修改课程（个性化课程）`
+	URL：	`/mycourse/[id]`
+	方法：	`PUT`
+	参数：
+	```
+	{
+	    "token":（token）,
+	    lesson:{
+            name:[string],
+            teacher:[string],
+            schedule:[
+                {
+                     week:(num),
+                     weekday:(num),
+                     class_index:(int)
+                },
+                ...
+            ]
+        }
+	}
+	```
+	返回值：`状态码200或204`
 
----
+-----
 ### 拥挤度查询
-
-用途：```获取拥挤度信息```
-URL：	```/get_crowdedness_rate_by_position```
+用途：```获取所有的拥挤度信息```
+URL：	```/crowdedness```
 方法：	```GET```
-参数:
+参数:	`token: <string>`
+返回值:
+
 ```
-    {
-        token: 'token',
-        position: '[龙]三号楼3402',
-    }
+{
+    crowdness:
+    [
+        {
+            position:(string),
+            crowdedness:(num)
+        },
+        ...
+    ]
+}
 ```
+
+用途：```按教室获取拥挤度信息```
+URL：	```/position/crowdedness```
+方法：	`GET`
+参数:	`token: <string>`
 返回值：
 ```
     {
@@ -59,18 +164,28 @@ URL：	```/get_crowdedness_rate_by_position```
     }
 ```
 
+用途：  ```按教室更新拥挤度信息```
+URL：	```/<position>/crowdedness```
+方法：	```post```
+参数:
+```
+{
+    token: <string>,
+    crowdedness:(num)
+}
+```
+返回值:	`状态码200或204`
+
 -----
 # 附近的课
 
 #### 1. 获取附近的课
-* URL：	```/get_nearby_lessons_by_position```
+* URL：	```/<position>/nearby_lessons```
 * 方法：	```GET```
 * 参数：
 ```
 {
-	key=(token),
-	position=(position),
-	lesson_time=('20102011-1-11-3-1')
+	token=(token)
 }
 ```
 * 返回值： 一个json对象
@@ -79,6 +194,7 @@ URL：	```/get_crowdedness_rate_by_position```
       "lessons": [
         {
           "name": "\u6570\u636e\u7ed3\u6784",
+          "teacher":[string]
           "position": "[\u9f99]\u4e09\u53f7\u697c3402"
         },
         {
