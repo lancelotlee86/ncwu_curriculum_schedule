@@ -2,7 +2,13 @@
 1.	用途：	获取token
 	URL：	`/token`
 	方法：	`GET`
-	参数：`?token=<string>`
+	参数：
+	```
+	{
+		"userid": (string),
+		"password": (string)
+	}
+	```
 	返回值：
 	
 	```
@@ -16,22 +22,22 @@
 1.	用途：	获取课程表（教学计划）
 	URL：	`/static_lessons`
 	方法：	`GET`
-	参数：	`?token=<string>`
+	参数：	`token: (string)`
 	返回值：  
     ```
     {
-        lessons:
+        courses:
         [
             {
-                "lesson_id": <num>,
-                "name": <string>,
-                teacher:[string],
-                schedule:
+                "course_id": (string),
+                "name": (string),
+                "teacher": (string),
+                "schedule":
                 [
                     {
-                        "week": <num>,
-                        weekday:(num),
-                        class_index:(num),
+                        "week": (num),
+                        "weekday": (num),
+                        "class_index": (num)
                     },
                     ...
                 ]
@@ -46,22 +52,22 @@
 2.	用途：	获取课程表（个性化课程）
 	URL：	`/mylessons`
 	方法：	`GET`
-	参数：	`?token=<string>`
+	参数：	`token: (string)`
 	返回值：
     ```
     {
-        lessons:
+        courses:
         [
             {
-                "lesson_id": <num>,
-                "name": <string>,
-                teacher:[string],
-                schedule:
+                "course_id": (num),
+                "name": (string),
+                "teacher": (string),
+                "schedule":
                 [
                     {
-                        "week": <num>,
-                        weekday:(num),
-                        class_index:(num),
+                        "week": (num),
+                        "weekday": (num),
+                        "class_index": (num),
                     },
                     ...
                 ]
@@ -79,82 +85,41 @@
 	参数：
 	```
 	{
-	    "token":（token）,
-	    lesson:{
-            name:[string],
-            teacher:[string],
-            schedule:[
-                {
-                     week:(num),
-                     weekday:(num),
-                     class_index:(int)
-                },
-                ...
-            ]
-        }
+	    "token":（string）,
+	    "course_id": (num),
 	}
 	```
-	返回值：
-	
-	```
-	{
-		"result": "success/fault",
-		"lesson_id": <num>
-	}
-	```
+	返回值：`状态码200或204`
 
 3.	用途：	删除课程（个性化课程）
 	URL：	`/mycourse/<id>`
 	方法：	`DELETE`
-	参数：	`token=(token)`
+	参数：	`?token=(string)`
 	返回值：`状态码200或204`
-
-3.	用途：	`修改课程（个性化课程）`
-	URL：	`/mycourse/[id]`
-	方法：	`PUT`
-	参数：
-	```
-	{
-	    "token":（token）,
-	    lesson:{
-            name:[string],
-            teacher:[string],
-            schedule:[
-                {
-                     week:(num),
-                     weekday:(num),
-                     class_index:(int)
-                },
-                ...
-            ]
-        }
-	}
-	```
-	返回值：`状态码200或204`
-
+	
 -----
 ### 拥挤度查询
-用途：```获取所有的拥挤度信息```
-URL：	```/crowdedness```
-方法：	```GET```
-参数:	`token: <string>`
+用途：`获取所有的拥挤度信息`
+URL：	`/crowdedness`
+方法：	`GET`
+参数:	`token: (string)`
 返回值:
 
 ```
 {
-    crowdness:
+    "crowdness":
     [
         {
-            position:(string),
-            crowdedness:(num)
+            "position": (string),
+            "crowdedness": (num)
         },
         ...
     ]
 }
 ```
 
-用途：```按教室获取拥挤度信息```
-URL：	```/position/crowdedness```
+用途：`按教室获取拥挤度信息`
+URL：	`/<position>/crowdedness`
 方法：	`GET`
 参数:	`token: <string>`
 返回值：
@@ -164,14 +129,14 @@ URL：	```/position/crowdedness```
     }
 ```
 
-用途：  ```按教室更新拥挤度信息```
-URL：	```/<position>/crowdedness```
-方法：	```post```
+用途：  `按教室更新拥挤度信息`
+URL：	`/<position>/crowdedness`
+方法：	`post`
 参数:
 ```
 {
-    token: <string>,
-    crowdedness:(num)
+    "token": (string),
+    "crowdedness": (num)
 }
 ```
 返回值:	`状态码200或204`
@@ -180,12 +145,13 @@ URL：	```/<position>/crowdedness```
 # 附近的课
 
 #### 1. 获取附近的课
-* URL：	```/<position>/nearby_lessons```
-* 方法：	```GET```
+* URL：	`/<position>/nearby_lessons`
+* 方法：	`GET`
 * 参数：
 ```
 {
-	token=(token)
+	"token"： (string),
+	"lesson_time": (string)    // 可有可无，见下面的说明
 }
 ```
 * 返回值： 一个json对象
@@ -193,13 +159,14 @@ URL：	```/<position>/crowdedness```
     {
       "lessons": [
         {
-          "name": "\u6570\u636e\u7ed3\u6784",
-          "teacher":[string]
-          "position": "[\u9f99]\u4e09\u53f7\u697c3402"
+          "name": (string),
+          "teacher": (string),
+          "position": (string)
         },
         {
-          "name": "\u6570\u636e\u7ed3\u6784",
-          "position": "[\u9f99]\u4e09\u53f7\u697c3403"
+          "name": (string),
+          "teacher": (string),
+          "position": (string)
         }
       ]
     }
