@@ -161,12 +161,14 @@ URL：	`/<position>/crowdedness`
         {
           "name": (string),
           "teacher": (string),
-          "position": (string)
+          "position": (string),
+          "fry_course_id": (string)
         },
         {
           "name": (string),
           "teacher": (string),
-          "position": (string)
+          "position": (string),
+          "fry_course_id": (string)
         }
       ]
     }

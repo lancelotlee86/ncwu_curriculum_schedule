@@ -222,6 +222,23 @@ class Lesson(Course, Classroom, LessonTime):
         return lessons
 
 
+class FryCourse:
+    fry_course_id = None
+
+    def __init__(lessons):
+        fry_course_id =
+
+    @classmethod
+    def multiple_fry_courses(cls, multiple_lessons):
+        fry_courses = []
+        for
+            lessons = []
+            lessons.append()
+        fry_course = FryCourse(lessons)
+        fry_courses.append(fry_course)
+        return fry_courses
+
+
 class User:
     name = None
 
@@ -236,7 +253,16 @@ class Student(User):
 if __name__ == '__main__':
     #c = Classroom(_position = '六号楼6103')
     #t = LessonTime.from_string('20102011-1-1-3-1')
-    #course = Course.from_classroom_and_lessontime(c, t)
+    #course = Course.from_classroom_and_lfry_courses = []
+lessons = []
+
+fry_courses = FryCourse(lessons)
+
+FryCourse:
+    fry_courses = []
+    fry_courses.append(
+    return fry_courses
+essontime(c, t)
 
     lesson = Lesson(_position='六号楼6103', _datetime_string='20102011-1-1-3-1')
 
