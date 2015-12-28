@@ -2,6 +2,7 @@ import pymysql.cursors
 from datetime import datetime
 from flask_app.sql_operation import *
 from flask_app.config import startDayOfTheFirstTerm, startDayOfTheSecondTerm
+from copy import deepcopy
 
 # Connect to the database
 connection = pymysql.connect(host='localhost',
@@ -83,14 +84,23 @@ class LessonTime:
     time = None
     datetime_string = None
 
-    def __init__(self, _datetime):
-        # 初始化接受的参数为 datetime 类型
-        self.year = self.get_year(_datetime)
-        self.term = self.get_term(_datetime)
-        self.week = self.get_week(_datetime)
-        self.day = self.get_day(_datetime)
-        self.time = self.get_time(_datetime)
-        self.datetime_string = '-'.join((str(self.year), str(self.term), str(self.week), str(self.day), str(self.time)))
+    def __init__(self, _datetime = None, _datetime_string = None):
+        # 初始化接受的参数为 datetime 类型或者一个我们自己定义的字符串
+        if(_datetime):
+            self.year = self.get_year(_datetime)
+            self.term = self.get_term(_datetime)
+            self.week = self.get_week(_datetime)
+            self.day = self.get_day(_datetime)
+            self.time = self.get_time(_datetime)
+            self.datetime_string = '-'.join((str(self.year), str(self.term), str(self.week), str(self.day), str(self.time)))
+        else:
+            self.datetime_string = _datetime_string
+            time_string = _datetime_string.split('-')
+            self.year = time_string[0]
+            self.term = time_string[1]
+            self.week = time_string[2]
+            self.day = time_string[3]
+            self.time = time_string[4]
 
     @classmethod
     def from_string(cls, time_string):
@@ -99,13 +109,7 @@ class LessonTime:
         :param time_string: string
         :return:
         '''
-        cls.datetime_string = time_string
-        time_string = time_string.split('-')
-        cls.year = time_string[0]
-        cls.term = time_string[1]
-        cls.week = time_string[2]
-        cls.day = time_string[3]
-        cls.time = time_string[4]
+
         return cls
 
 
@@ -168,17 +172,15 @@ class Course:
     crs_id = None  # 课程id
     type = None # 课程类型，选修或必修
 
-    # def __init__(self, )
-    @classmethod
-    def from_classroom_and_lessontime(cls, classroom, lesson_time):
+    # from_classroom_and_lessontime
+    def __init__(self, classroom, lesson_time):
         sql = sql_getCourseByPositionAndTime
         with connection.cursor() as cursor:
             cursor.execute(sql, (classroom.clsrm_id, lesson_time.year, lesson_time.term, lesson_time.week, lesson_time.day, lesson_time.time))
             result = cursor.fetchone()
-            cls.name = result['name']
-            cls.crs_id = result['id']
-            cls.type = result['type']
-        return cls
+            self.name = result['name']
+            self.crs_id = result['id']
+            self.type = result['type']
 
 
 class Lesson(Course, Classroom, LessonTime):
@@ -194,9 +196,9 @@ class Lesson(Course, Classroom, LessonTime):
 
         # 初始化 LessonTime 父类
         if _datetime:
-            LessonTime.__init__(self, _datetime)
+            LessonTime.__init__(self, _datetime = _datetime)
         else:
-            LessonTime.from_string(_datetime_string)
+            LessonTime.__init__(self, _datetime_string = _datetime_string)
 
         # 初始化 Course 父类。这里由于 Course 类的构造函数使用的是 Classroom 和 LessonTime 的实例，所以这里就实例了一下
         if( _position):
@@ -204,10 +206,10 @@ class Lesson(Course, Classroom, LessonTime):
         else:
             classroom = Classroom(clsrm_id=clsrm_id)
         if( _datetime):
-            lesson = LessonTime(_datetime)
+            lesson_time = LessonTime(_datetime = _datetime)
         else:
-            lesson = LessonTime.from_string(_datetime_string)
-        Course.from_classroom_and_lessontime(classroom, lesson)
+            lesson_time = LessonTime(_datetime_string=_datetime_string)
+        Course.__init__(self, classroom, lesson_time)
 
     def __repr__(self):
         return '<Lesson %r, %r>' % (self.name, self._position)
@@ -216,27 +218,67 @@ class Lesson(Course, Classroom, LessonTime):
         # 获取这节课附近的教室
         positions = self.nearby_classrooms()
         lessons = []
+        lesson = None
         for position in positions:
-            lesson = Lesson(clsrm_id=position.clsrm_id, _datetime_string=self.datetime_string)
-            lessons.append(lesson)
+            #lesson = Lesson(clsrm_id=position.clsrm_id, _datetime_string=self.datetime_string)
+            #lesson_copy = deepcopy(lesson)
+            #lessons.append(lesson_copy)
+            lessons.append(Lesson(clsrm_id=position.clsrm_id, _datetime_string=self.datetime_string))
+            djfidjfidfj = 1213123
         return lessons
+
+    @staticmethod
+    def static_lessons(class_id):
+        #lessons = []
+        sql = sql_getLessonsByClassId
+        with connection.cursor() as cursor:
+            cursor.execute(sql, class_id)
+            results = cursor.fetchall()
+            for result in results:
+                datetime_string = "-".join([result['year'], result['term'], result['week'], result['day'], result['time']])
+                lesson = Lesson(_position=result['position'],_datetime_string=datetime_string)
+                lesson.fry_course_id = result['fry_course_id']  # 本来应该要让 Lesson 类再继承一个 Class 类的，但是没有些，所以关于class的属性就在这里临时加上了
+                #lessons.append(lesson)
+                # 这里莫名其妙用return lessons[] 会出错
+                yield lesson
 
 
 class FryCourse:
     fry_course_id = None
 
-    def __init__(lessons):
-        fry_course_id =
+    def __init__():
+        pass
+
+    @classmethod
+    def single_fry_course(cls, single_lessons):
+        return
 
     @classmethod
     def multiple_fry_courses(cls, multiple_lessons):
+        from itertools import tee
+        #multiple_lessons, copy_multiple_lessons = tee(multiple_lessons) # 复制一份生成器用来遍历从而生成不用的class_id组成的列表
+        from collections import defaultdict
+        lessons_by_fry_course_id = defaultdict(list)
+        for lesson in multiple_lessons:
+            lesson_copy = deepcopy(lesson)
+            lessons_by_fry_course_id[lesson_copy.fry_course_id].append(lesson_copy)
+        return lessons_by_fry_course_id
+        kkk = 12313123
+        '''
+        all_classes = []
+        class_id = None
+        for lesson in copy_multiple_lessons:
+            if class_id == lesson.fry_course_id:
+        '''
+        '''
         fry_courses = []
         for
             lessons = []
             lessons.append()
-        fry_course = FryCourse(lessons)
+        fry_course = FryCourse.single_fry_course(lessons)
         fry_courses.append(fry_course)
         return fry_courses
+        '''
 
 
 class User:
@@ -254,16 +296,9 @@ if __name__ == '__main__':
     #c = Classroom(_position = '六号楼6103')
     #t = LessonTime.from_string('20102011-1-1-3-1')
     #course = Course.from_classroom_and_lfry_courses = []
-lessons = []
-
-fry_courses = FryCourse(lessons)
-
-FryCourse:
-    fry_courses = []
-    fry_courses.append(
-    return fry_courses
-essontime(c, t)
-
-    lesson = Lesson(_position='六号楼6103', _datetime_string='20102011-1-1-3-1')
 
 
+    l = Lesson(_position='六号楼6103', _datetime_string='20102011-1-1-3-1')
+    nearby = l.nearby_lessons()
+    ls = Lesson.static_lessons("2009003")
+    fcs = FryCourse.multiple_fry_courses(ls)

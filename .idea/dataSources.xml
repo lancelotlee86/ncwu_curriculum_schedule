@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="3776902860">
+  <component name="DataSourceManagerImpl" format="xml" hash="867783461">
     <data-source source="LOCAL" name="MySQL - curriculum_schedule_app@localhost" uuid="9be70a15-ab5f-4fea-954a-bc0aedd85023">
       <driver-ref>mysql</driver-ref>
       <synchronize>true</synchronize>

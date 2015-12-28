@@ -7,7 +7,7 @@ from flask_app.func_with_database import func_getCourseNameAndPositionByTimeAndP
 from flask_app.func_with_database import func_getClassTimeByGivenTime
 from flask_app.func_with_database import func_checkAccount
 
-from flask_app.models import Classroom, Lesson, LessonTime
+from flask_app.models import Classroom, Lesson, LessonTime, FryCourse
 
 app = Flask(__name__)
 app.debug = True
@@ -57,6 +57,14 @@ def checkAccount(username, password):
     return '0'
 
 
+@app.route("/static_lessons")
+def static_lessons():
+    ''' 这里的 lessons 指的是 fry_courses'''
+    class_id = "2009003"    # 暂时这么用，稍后再加入token提取请求的class
+    static_lessons = Lesson.static_lessons(class_id)    # 现在 static_lessons 是所有的给定班级的lessons
+    # 这个 static_lessons 实际上是一个 generater,我换成列表会出错
+    fry_courses = FryCourse.multiple_fry_courses(static_lessons)    # 这里得到的 fry_courses 是fry_courses的序列
+    return fry_courses
 
 
 if __name__ == "__main__":

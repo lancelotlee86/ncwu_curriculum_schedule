@@ -27,8 +27,9 @@ sql_getClassroomIdByPosition = """
 	WHERE
 		position = %s
 	"""
-"""
+
 # 通过给定的 class 返回这个班所有上的课
+sql_getLessonsByClassId = """
 SELECT
 	*
 FROM (
@@ -38,6 +39,7 @@ FROM (
 		SELECT
 			lesson.id,
 			class.id AS 'class',
+			lesson.fry_course_id,
 			class.major,
 			course.name AS 'course',
 			lesson.year,
@@ -49,13 +51,13 @@ FROM (
 		FROM
 			lesson inner join course inner join classroom inner join class
 		WHERE
-			class.id=lesson.class_id AND classroom.id=lesson.classroom_id AND course.id=lesson.course_id AND class.id='2009003'
+			class.id=lesson.class_id AND classroom.id=lesson.classroom_id AND course.id=lesson.course_id AND class.id=%s
 		) AS t
 	WHERE t.day!='2' OR t.time!='4'
 	) as tt
 WHERE tt.day!='5' OR tt.time!='4'
-
 """
+
 # 通过给定的教室position返回拥挤程度
 sql_getCrowdednessRateByPosition = '''
     SELECT
