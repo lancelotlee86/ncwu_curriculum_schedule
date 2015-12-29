@@ -75,5 +75,12 @@ def static_lessons():
     return jsonify(courses=fry_courses_json)
 
 
+@app.route("/mylessons", methods=['GET'])
+def get_mylessons():
+    ''' 这里的 lessons 指的是 fry_courses'''
+    student_id = "200900301"    # 暂时这么用，稍后再加入token提取请求的student
+
+
+
 if __name__ == "__main__":
     app.run(host='localhost', port=8081, debug=True)

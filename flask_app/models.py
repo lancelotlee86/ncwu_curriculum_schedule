@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_app.sql_operation import *
 from flask_app.config import startDayOfTheFirstTerm, startDayOfTheSecondTerm
 from copy import deepcopy
+import json
 
 # Connect to the database
 connection = pymysql.connect(host='localhost',
@@ -306,7 +307,34 @@ class User:
     name = None
 
 class Student(User):
-    pass
+    id = None
+    fry_courses_id = []
+
+    def __init__(self, student_id):
+        sql = sql_get_student
+        with connection.cursor() as cursor:
+            cursor.execute(sql, student_id)
+            result = cursor.fetchone()
+        self.id = result['id']
+        self.fry_courses_id = json.loads(result['mycourses'])
+
+    def add_mycourse(self, fry_course_id=None, fry_course_obj=None):
+        if fry_course_id:
+            self.fry_courses_id.append(fry_course_id)
+        else:
+            self.fry_courses_id.append(fry_course_obj.fry_course_id)
+        self.update_mycourse()
+
+
+    def update_mycourse(self):
+        sql = sql_update_mycourse_to_student
+        with connection.cursor() as cursor:
+            cursor.execute(sql, json.dumps(self.fry_courses_id), self.id)
+        connection.commit()
+
+
+
+
 
 class Teacher(User):
     pass

@@ -126,3 +126,11 @@ FROM
 WHERE
 	id = 201315414
 """
+
+sql_get_student = """
+    SELECT * FROM student WHERE id=%s
+"""
+
+sql_update_mycourse_to_student = """
+    UPDATE student SET mycourses = %s WHERE id=%s
+"""
