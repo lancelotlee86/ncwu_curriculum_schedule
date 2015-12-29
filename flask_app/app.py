@@ -1,22 +1,32 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from datetime import datetime
+import uuid
 
-from flask_app.func_with_database import func_getCrowdednessRateByPosition
-from flask_app.func_with_database import func_getNearbyPositionsByPosition
-from flask_app.func_with_database import func_getCourseNameAndPositionByTimeAndPosition
-from flask_app.func_with_database import func_getClassTimeByGivenTime
 from flask_app.func_with_database import func_checkAccount
 
-from flask_app.models import Classroom, Lesson, LessonTime, FryCourse
+from flask_app.models import Classroom, Lesson, LessonTime, FryCourse, Student
 
 app = Flask(__name__)
 app.debug = True
 
 
+
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return str(tokens)
 
+@app.route("/token")
+def token():
+    user_id = request.args.get('userid')
+    if len(user_id) == 9:   # 学生
+        user = Student(user_id)
+    else:
+        pass    # 教师的暂时没写
+    if user.password != request.args.get('password'):
+        abort(404)
+    token = str(uuid.uuid1())
+    tokens[token] = user.id
+    return jsonify(token=token)
 
 @app.route("/get_crowdedness_rate_by_position")
 def get_crowdedness_rate_by_position():
@@ -60,7 +70,14 @@ def checkAccount(username, password):
 @app.route("/static_lessons")
 def static_lessons():
     ''' 这里的 lessons 指的是 fry_courses'''
-    class_id = "2009003"    # 暂时这么用，稍后再加入token提取请求的class
+
+    # token 验证
+    if request.args.get("token") not in tokens:
+        abort(404)
+    else:
+        user_id = tokens[request.args.get("token")]
+
+    class_id = user_id[0:7]
     static_lessons = Lesson.static_lessons(class_id)    # 现在 static_lessons 是所有的给定班级的lessons
     # 这个 static_lessons 实际上是一个 generater,我换成列表会出错
     fry_courses = FryCourse.multiple_fry_courses(static_lessons)    # 这里得到的 fry_courses 是fry_courses的序列
@@ -78,9 +95,68 @@ def static_lessons():
 @app.route("/mylessons", methods=['GET'])
 def get_mylessons():
     ''' 这里的 lessons 指的是 fry_courses'''
-    student_id = "200900301"    # 暂时这么用，稍后再加入token提取请求的student
 
+    # token 验证
+    if request.args.get("token") not in tokens:
+        abort(404)
+    else:
+        user_id = tokens[request.args.get("token")]
+
+    student_id = user_id
+    stu = Student(student_id)
+    fry_courses_id = stu.fry_courses_id
+
+    fry_courses = []
+    for fry_course_id in fry_courses_id:
+        fry_courses.append( FryCourse.fry_course_by_fry_course_id(fry_course_id))
+
+    fry_courses_json = []
+    for fry_course in fry_courses:
+        fry_course_json = {}
+        fry_course_json['course_id'] = fry_course.fry_course_id
+        fry_course_json['name'] = fry_course.fry_course_name
+        fry_course_json['teacher'] = fry_course.fry_course_teacher
+        fry_course_json['schedule'] = fry_course.fry_course_schedule
+        fry_courses_json.append(fry_course_json)
+    return jsonify(courses=fry_courses_json)
+
+@app.route("/mylessons", methods=['POST'])
+def post_mylessons():
+    ''' 这里的 lessons 指的是 fry_courses'''
+
+    # token 验证
+    if request.args.get("token") not in tokens:
+        abort(404)
+    else:
+        user_id = tokens[request.args.get("token")]
+
+    student_id = user_id
+    fry_course_id = '05100402008085'
+
+    stu = Student(student_id)
+    stu.add_mycourse(fry_course_id=fry_course_id)
+
+    return '200'
+
+@app.route("/mylessons/<course_id>", methods=['DELETE'])
+def delete_mylessons(course_id):
+    ''' 这里的 lessons 指的是 fry_courses'''
+
+    # token 验证
+    if request.args.get("token") not in tokens:
+        abort(404)
+    else:
+        user_id = tokens[request.args.get("token")]
+
+    student_id = user_id
+    fry_course_id = course_id    # '05100402008085'
+
+    stu = Student(student_id)
+    stu.delete_mycourse(fry_course_id=fry_course_id)
+
+    return '200'
 
 
 if __name__ == "__main__":
+    tokens = {}
     app.run(host='localhost', port=8081, debug=True)

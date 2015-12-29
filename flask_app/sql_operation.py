@@ -134,3 +134,18 @@ sql_get_student = """
 sql_update_mycourse_to_student = """
     UPDATE student SET mycourses = %s WHERE id=%s
 """
+
+sql_get_lessons_by_fry_course_id = """
+SELECT
+            classroom_id,
+            lesson.id,
+			lesson.class_id AS 'class',
+			lesson.fry_course_id,
+			lesson.year,
+			lesson.term,
+			lesson.week,
+			lesson.day,
+			lesson.time,
+      lesson.teacher_id,
+      teacher.name AS teacher_name FROM lesson INNER JOIN teacher WHERE lesson.teacher_id=teacher.id AND fry_course_id=%s
+"""

@@ -259,6 +259,27 @@ class FryCourse:
         self.fry_course_schedule = fry_course_shedule
 
     @staticmethod
+    def fry_course_by_fry_course_id(fry_course_id):
+        '''接受一个 fry_course_id ，返回一个 fry_course 对象'''
+
+        # 先通过给定的fry_course_id生成 lesson对象的序列
+        sql = sql_get_lessons_by_fry_course_id
+        with connection.cursor() as cursor:
+            cursor.execute(sql, fry_course_id)
+            results = cursor.fetchall()
+        lessons = []
+        for result in results:
+            datetime_string = "-".join([result['year'], result['term'], result['week'], result['day'], result['time']])
+            lesson = Lesson(clsrm_id=result['classroom_id'], _datetime_string=datetime_string)
+            lesson.fry_course_id = result['fry_course_id']  # 本来应该要让 Lesson 类再继承一个 Class 类的，但是没有些，所以关于class的属性就在这里临时加上了
+            lesson.teacher_name = result['teacher_name']    # 同上，本来是要继承一个 Teacher 的，临时解决方案
+            lessons.append(lesson)
+
+        # 将 lesson对象序列传给 静态方法 sing_fry_course，得到一门 course
+        this_fry_course = FryCourse.single_fry_course(lessons)
+        return this_fry_course
+
+    @staticmethod
     def single_fry_course(single_lessons):
         '''
         返回一门 fry_course 类的对象
@@ -308,6 +329,7 @@ class User:
 
 class Student(User):
     id = None
+    password = None
     fry_courses_id = []
 
     def __init__(self, student_id):
@@ -316,6 +338,7 @@ class Student(User):
             cursor.execute(sql, student_id)
             result = cursor.fetchone()
         self.id = result['id']
+        self.password = result['password']
         self.fry_courses_id = json.loads(result['mycourses'])
 
     def add_mycourse(self, fry_course_id=None, fry_course_obj=None):
@@ -323,13 +346,19 @@ class Student(User):
             self.fry_courses_id.append(fry_course_id)
         else:
             self.fry_courses_id.append(fry_course_obj.fry_course_id)
-        self.update_mycourse()
+        self.refresh_mycourse()
 
+    def delete_mycourse(self, fry_course_id=None, fry_course_obj=None):
+        if fry_course_id:
+            self.fry_courses_id.remove(fry_course_id)
+        else:
+            self.fry_courses_id.remove(fry_course_obj.fry_course_id)
+        self.refresh_mycourse()
 
-    def update_mycourse(self):
+    def refresh_mycourse(self):
         sql = sql_update_mycourse_to_student
         with connection.cursor() as cursor:
-            cursor.execute(sql, json.dumps(self.fry_courses_id), self.id)
+            re = cursor.execute(sql, json.dumps(self.fry_courses_id), self.id)
         connection.commit()
 
 
