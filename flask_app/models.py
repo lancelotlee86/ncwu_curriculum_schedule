@@ -211,6 +211,7 @@ class Lesson(Course, Classroom, LessonTime):
             lesson_time = LessonTime(_datetime_string=_datetime_string)
         Course.__init__(self, classroom, lesson_time)
 
+
     def __repr__(self):
         return '<Lesson %r, %r>' % (self.name, self._position)
 
@@ -238,6 +239,7 @@ class Lesson(Course, Classroom, LessonTime):
                 datetime_string = "-".join([result['year'], result['term'], result['week'], result['day'], result['time']])
                 lesson = Lesson(_position=result['position'],_datetime_string=datetime_string)
                 lesson.fry_course_id = result['fry_course_id']  # 本来应该要让 Lesson 类再继承一个 Class 类的，但是没有些，所以关于class的属性就在这里临时加上了
+                lesson.teacher_name = result['teacher_name']    # 同上，本来是要继承一个 Teacher 的，临时解决方案
                 #lessons.append(lesson)
                 # 这里莫名其妙用return lessons[] 会出错
                 yield lesson
@@ -245,16 +247,46 @@ class Lesson(Course, Classroom, LessonTime):
 
 class FryCourse:
     fry_course_id = None
+    fry_course_name = None
+    fry_course_teacher = None
+    fry_course_schedule = []
 
-    def __init__():
-        pass
+    def __init__(self, fry_course_id=fry_course_id,fry_course_name=fry_course_name, fry_course_teacher=fry_course_teacher, fry_course_shedule=fry_course_schedule):
+        self.fry_course_id = fry_course_id
+        self.fry_course_name = fry_course_name
+        self.fry_course_teacher = fry_course_teacher
+        self.fry_course_schedule = fry_course_shedule
 
-    @classmethod
-    def single_fry_course(cls, single_lessons):
-        return
+    @staticmethod
+    def single_fry_course(single_lessons):
+        '''
+        返回一门 fry_course 类的对象
+        传进来的 single_lessons 是一门 fry_course 的 lesson 的序列
+        '''
 
-    @classmethod
-    def multiple_fry_courses(cls, multiple_lessons):
+        this_fry_course_id = single_lessons[0].fry_course_id
+        this_fry_course_name = single_lessons[0].name
+        this_fry_course_teacher = single_lessons[0].teacher_name
+        this_fry_course_schedule = []
+        for lesson in single_lessons:
+            one_schedule = {}
+            one_schedule['year'] = lesson.year
+            one_schedule['term'] = lesson.term
+            one_schedule['week'] = lesson.week
+            one_schedule['weekday'] = lesson.day
+            one_schedule['class_index'] = lesson.time
+            one_schedule['campus'] = lesson.campus
+            one_schedule['building'] = lesson.building
+            one_schedule['floor'] = lesson.floor
+            one_schedule['number'] = lesson.number
+            one_schedule['position'] = lesson._position
+            this_fry_course_schedule.append(one_schedule)
+        # 最后返回的是单个的Fry_course对象
+        return FryCourse(fry_course_id=this_fry_course_id, fry_course_name=this_fry_course_name,
+                         fry_course_teacher=this_fry_course_teacher, fry_course_shedule=this_fry_course_schedule)
+
+    @staticmethod
+    def multiple_fry_courses(multiple_lessons):
         from itertools import tee
         #multiple_lessons, copy_multiple_lessons = tee(multiple_lessons) # 复制一份生成器用来遍历从而生成不用的class_id组成的列表
         from collections import defaultdict
@@ -262,35 +294,22 @@ class FryCourse:
         for lesson in multiple_lessons:
             lesson_copy = deepcopy(lesson)
             lessons_by_fry_course_id[lesson_copy.fry_course_id].append(lesson_copy)
-        return lessons_by_fry_course_id
-        kkk = 12313123
-        '''
-        all_classes = []
-        class_id = None
-        for lesson in copy_multiple_lessons:
-            if class_id == lesson.fry_course_id:
-        '''
-        '''
         fry_courses = []
-        for
-            lessons = []
-            lessons.append()
-        fry_course = FryCourse.single_fry_course(lessons)
-        fry_courses.append(fry_course)
+        for fry_course_id in lessons_by_fry_course_id:
+            fry_course = FryCourse.single_fry_course(lessons_by_fry_course_id[fry_course_id])
+            fry_courses.append(fry_course)
+        # 返回 Fry_course 对象的序列
         return fry_courses
-        '''
 
 
 class User:
     name = None
 
-
-
-
 class Student(User):
     pass
 
-
+class Teacher(User):
+    pass
 
 if __name__ == '__main__':
     #c = Classroom(_position = '六号楼6103')
@@ -298,7 +317,8 @@ if __name__ == '__main__':
     #course = Course.from_classroom_and_lfry_courses = []
 
 
-    l = Lesson(_position='六号楼6103', _datetime_string='20102011-1-1-3-1')
-    nearby = l.nearby_lessons()
+    #l = Lesson(_position='六号楼6103', _datetime_string='20102011-1-1-3-1')
+    #nearby = l.nearby_lessons()
     ls = Lesson.static_lessons("2009003")
     fcs = FryCourse.multiple_fry_courses(ls)
+    llll=0

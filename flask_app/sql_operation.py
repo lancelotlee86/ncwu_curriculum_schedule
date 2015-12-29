@@ -39,19 +39,21 @@ FROM (
 		SELECT
 			lesson.id,
 			class.id AS 'class',
-			lesson.fry_course_id,
 			class.major,
+			lesson.fry_course_id,
 			course.name AS 'course',
 			lesson.year,
 			lesson.term,
 			lesson.week,
 			lesson.day,
 			lesson.time,
-			classroom.position
+			classroom.position,
+      lesson.teacher_id,
+      teacher.name AS teacher_name
 		FROM
-			lesson inner join course inner join classroom inner join class
+			lesson inner join course inner join classroom inner join class INNER JOIN teacher
 		WHERE
-			class.id=lesson.class_id AND classroom.id=lesson.classroom_id AND course.id=lesson.course_id AND class.id=%s
+			class.id=lesson.class_id AND classroom.id=lesson.classroom_id AND course.id=lesson.course_id AND class.id=%s AND teacher.id=lesson.teacher_id
 		) AS t
 	WHERE t.day!='2' OR t.time!='4'
 	) as tt

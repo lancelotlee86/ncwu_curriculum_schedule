@@ -64,7 +64,15 @@ def static_lessons():
     static_lessons = Lesson.static_lessons(class_id)    # 现在 static_lessons 是所有的给定班级的lessons
     # 这个 static_lessons 实际上是一个 generater,我换成列表会出错
     fry_courses = FryCourse.multiple_fry_courses(static_lessons)    # 这里得到的 fry_courses 是fry_courses的序列
-    return fry_courses
+    fry_courses_json = []
+    for fry_course in fry_courses:
+        fry_course_json = {}
+        fry_course_json['course_id'] = fry_course.fry_course_id
+        fry_course_json['name'] = fry_course.fry_course_name
+        fry_course_json['teacher'] = fry_course.fry_course_teacher
+        fry_course_json['schedule'] = fry_course.fry_course_schedule
+        fry_courses_json.append(fry_course_json)
+    return jsonify(courses=fry_courses_json)
 
 
 if __name__ == "__main__":
