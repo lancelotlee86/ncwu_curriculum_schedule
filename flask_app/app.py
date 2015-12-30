@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, abort
 from datetime import datetime
 import uuid
 
-from flask_app.func_with_database import func_checkAccount
+#from flask_app.func_with_database import func_checkAccount
 
 from flask_app.models import Classroom, Lesson, LessonTime, FryCourse, Student
 
@@ -18,8 +18,12 @@ def hello():
 @app.route("/token")
 def token():
     user_id = request.args.get('userid')
+    if not user_id:
+        abort(404)
     if len(user_id) == 9:   # 学生
         user = Student(user_id)
+        if not user:
+            abort(404)
     else:
         pass    # 教师的暂时没写
     if user.password != request.args.get('password'):
@@ -36,20 +40,20 @@ def get_crowdedness_rate_by_position():
     return jsonify(crowdedness=crowdedness)
 
 
-@app.route("/get_nearby_lessons_by_position")
-def get_nearby_lessons_by_position():
+@app.route("/<position>/nearby_lessons")
+def position_nearby_lessons(position):
     """
     返回给定教室和时间的附近的课，这个方法默认当前访问时间
     :param
     :return:
     """
-    position = request.args.get('position')
-    lessontime = request.args.get('lessontime')
+    position = position
+    lesson_time = request.args.get('lesson_time')
 
     classroom = Classroom(_position=position)
-    #lessontime = '20102011-1-11-3-1'
-    if lessontime:
-        lesson = Lesson(clsrm_id=classroom.clsrm_id, _datetime_string=lessontime)
+    #lesson_time = '20102011-1-11-3-1'
+    if lesson_time:
+        lesson = Lesson(clsrm_id=classroom.clsrm_id, _datetime_string=lesson_time)
     else:
         now = datetime.now()
         lesson = Lesson(clsrm_id=classroom.clsrm_id, _datetime=now)
@@ -60,12 +64,13 @@ def get_nearby_lessons_by_position():
         re.append({'name': lesson.name, 'position': lesson._position})
     return jsonify(lessons=re)
 
+"""
 @app.route("/check_account/<username>/<password>")
 def checkAccount(username, password):
     if func_checkAccount(username, password):
         return '1'
     return '0'
-
+"""
 
 @app.route("/static_lessons")
 def static_lessons():
@@ -129,9 +134,12 @@ def post_mylessons():
         abort(404)
     else:
         user_id = tokens[request.args.get("token")]
+    if not request.args.get("course_id"):
+        abort(404)
+    else:
+        fry_course_id = request.args.get("course_id")
 
     student_id = user_id
-    fry_course_id = '05100402008085'
 
     stu = Student(student_id)
     stu.add_mycourse(fry_course_id=fry_course_id)
@@ -158,5 +166,5 @@ def delete_mylessons(course_id):
 
 
 if __name__ == "__main__":
-    tokens = {}
+    tokens = {"backdoor_token": "200900101"}
     app.run(host='localhost', port=8081, debug=True)

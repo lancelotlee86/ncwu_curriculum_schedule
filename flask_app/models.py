@@ -231,7 +231,7 @@ class Lesson(Course, Classroom, LessonTime):
 
     @staticmethod
     def static_lessons(class_id):
-        #lessons = []
+        lessons = []
         sql = sql_getLessonsByClassId
         with connection.cursor() as cursor:
             cursor.execute(sql, class_id)
@@ -241,9 +241,8 @@ class Lesson(Course, Classroom, LessonTime):
                 lesson = Lesson(_position=result['position'],_datetime_string=datetime_string)
                 lesson.fry_course_id = result['fry_course_id']  # 本来应该要让 Lesson 类再继承一个 Class 类的，但是没有些，所以关于class的属性就在这里临时加上了
                 lesson.teacher_name = result['teacher_name']    # 同上，本来是要继承一个 Teacher 的，临时解决方案
-                #lessons.append(lesson)
-                # 这里莫名其妙用return lessons[] 会出错
-                yield lesson
+                lessons.append(lesson)
+            return lessons
 
 
 class FryCourse:
@@ -337,6 +336,8 @@ class Student(User):
         with connection.cursor() as cursor:
             cursor.execute(sql, student_id)
             result = cursor.fetchone()
+            if not result:
+                return
         self.id = result['id']
         self.password = result['password']
         self.fry_courses_id = json.loads(result['mycourses'])
@@ -358,7 +359,7 @@ class Student(User):
     def refresh_mycourse(self):
         sql = sql_update_mycourse_to_student
         with connection.cursor() as cursor:
-            re = cursor.execute(sql, json.dumps(self.fry_courses_id), self.id)
+            re = cursor.execute(sql, (json.dumps(self.fry_courses_id), self.id))
         connection.commit()
 
 
