@@ -75,6 +75,12 @@ class Classroom:
             result = cursor.fetchone()
             return result
 
+    def post_crowdedness(self):
+        """
+        提交一条新的教室拥挤的的数据
+        :return:
+        """
+
 
 class LessonTime:
 
@@ -341,6 +347,7 @@ class Student(User):
         self.id = result['id']
         self.password = result['password']
         self.fry_courses_id = json.loads(result['mycourses'])
+        pass
 
     def add_mycourse(self, fry_course_id=None, fry_course_obj=None):
         if fry_course_id:
@@ -379,4 +386,3 @@ if __name__ == '__main__':
     #nearby = l.nearby_lessons()
     ls = Lesson.static_lessons("2009003")
     fcs = FryCourse.multiple_fry_courses(ls)
-    llll=0

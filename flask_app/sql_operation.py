@@ -10,13 +10,13 @@ sql_getClassroomByPosition = """
 
 #通过给定的 classroom id 返回与之相应的 position
 sql_getPositionByClassroomId = """
-	SELECT
-		position
-	FROM
-		classroom
-	WHERE
-		id = %s
-	"""
+    SELECT
+        position
+    FROM
+        classroom
+    WHERE
+        id = %s
+    """
 
 #通过给定的 position 返回与之相应的 classroom_id
 sql_getClassroomIdByPosition = """
@@ -137,15 +137,17 @@ sql_update_mycourse_to_student = """
 
 sql_get_lessons_by_fry_course_id = """
 SELECT
-            classroom_id,
-            lesson.id,
-			lesson.class_id AS 'class',
-			lesson.fry_course_id,
-			lesson.year,
-			lesson.term,
-			lesson.week,
-			lesson.day,
-			lesson.time,
-      lesson.teacher_id,
-      teacher.name AS teacher_name FROM lesson INNER JOIN teacher WHERE lesson.teacher_id=teacher.id AND fry_course_id=%s
+    classroom_id,
+    lesson.id,
+    lesson.class_id AS 'class',
+    lesson.fry_course_id,
+    lesson.year,
+    lesson.term,
+    lesson.week,
+    lesson.day,
+    lesson.time,
+    lesson.teacher_id,
+    teacher.name AS teacher_name
+    FROM lesson INNER JOIN teacher
+    WHERE lesson.teacher_id=teacher.id AND fry_course_id=%s
 """

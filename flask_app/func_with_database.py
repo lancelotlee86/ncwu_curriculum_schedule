@@ -36,6 +36,7 @@ def func_insertCrowdednessRateByPosition(rate, position):
     now = datetime.now()
     with connection.cursor() as cursor:
         cursor.execute(sql, (classroom_id, rate, now))
+        connection.commit()
     return True
 
 ######################################################################################################
