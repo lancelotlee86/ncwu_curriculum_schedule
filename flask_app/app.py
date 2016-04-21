@@ -1,5 +1,6 @@
+#encoding=utf-8
 from flask import Flask, request, jsonify, abort
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 
 from flask_app.func_with_database import func_insertCrowdednessRateByPosition
@@ -14,6 +15,7 @@ app.debug = True
 @app.route("/")
 def hello():
     return str(tokens)
+
 
 # API----获取token
 '''
@@ -55,6 +57,16 @@ def token():
 '''
 @app.route("/<position>/crowdedness")
 def get_crowdedness_rate_by_position(position):
+    if position[0] == '1':
+        position = '[龙]一号楼' + position
+    elif position[0] == '2':
+        position = '[龙]二号楼' + position
+    elif position[0] == '3':
+        position = '[龙]三号楼' + position
+    elif position[0] == '4':
+        position = '[龙]四号楼' + position
+    elif position[0] == '5':
+        position = '[龙]五号楼' + position
     classroom = Classroom(_position=position)
     crowdedness = classroom.crowdedness()['crowded_rate']
     return jsonify(crowdedness=crowdedness)
@@ -120,7 +132,8 @@ def position_nearby_lessons(position):
         lesson = Lesson(clsrm_id=classroom.clsrm_id, _datetime_string=lesson_time)
     else:   # 参数中没有给定时间，使用当前时间
         now = datetime.now()
-        lesson = Lesson(clsrm_id=classroom.clsrm_id, _datetime=now)
+        then = now + timedelta(minutes = 60) # 直接加上60分钟好了，临时这么做，因为客户端不好修改。
+        lesson = Lesson(clsrm_id=classroom.clsrm_id, _datetime=then)
 
     # 通过一个Lesson对象的静态方法，得到附近的课的序列，最后处理一下数据返回
     nearby_lessons = lesson.nearby_lessons()
@@ -128,14 +141,6 @@ def position_nearby_lessons(position):
     for lesson in nearby_lessons:
         re.append({'name': lesson.name, 'position': lesson._position})
     return jsonify(lessons=re)
-
-"""
-@app.route("/check_account/<username>/<password>")
-def checkAccount(username, password):
-    if func_checkAccount(username, password):
-        return '1'
-    return '0'
-"""
 
 
 # API----获取某个班的固定课程，课程表（教学计划）
@@ -191,7 +196,8 @@ def static_lessons():
         fry_course_json['teacher'] = fry_course.fry_course_teacher
         fry_course_json['schedule'] = fry_course.fry_course_schedule
         fry_courses_json.append(fry_course_json)
-    return jsonify(courses=fry_courses_json)
+    return jsonify(courses=fry_courses_json[0:50])
+
 
 
 # API----获取课程表（个性化课程）
@@ -229,6 +235,7 @@ def get_mylessons():
         fry_course_json['schedule'] = fry_course.fry_course_schedule
         fry_courses_json.append(fry_course_json)
     return jsonify(courses=fry_courses_json)
+
 
 
 # API----添加课程（个性化课程），只能一节一节课添加
